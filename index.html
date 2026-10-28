@@ -105,6 +105,10 @@ tr.hit td{background:#0F2015}
 .rate.hi{color:var(--green)}.rate.mid{color:var(--white)}.rate.lo{color:#7F8C84}
 .rpill{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;padding:4px 9px;border-radius:999px;background:var(--card2);color:var(--ink2);white-space:nowrap}
 .rpill.hi{background:var(--greenbg);color:var(--green)}
+.cvn{display:flex;align-items:flex-end;gap:12px;padding:10px 12px;border-radius:10px;background:var(--card2)}
+.cvn .k{font-size:11px;color:var(--mute)}.cvn .v{font:italic 900 24px/1.1 var(--display)}.cvn .v.mute{color:var(--ink2)}.cvn .vs{font-size:12px;color:var(--mute);padding-bottom:4px}.cvn .grow{flex:1}
+.explain{font-size:13px;line-height:1.5;color:var(--ink2);padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:#0A100C}
+.explain .tag{font-size:10px;padding:2px 6px}
 .tier{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font:900 18px var(--display);color:#050706;flex-shrink:0;background:var(--green)}
 .tier.B{background:var(--ink2)}.tier.C{background:#6B776F}
 .goalie-st{font-size:10px;font-weight:700;letter-spacing:.6px;padding:3px 6px;border-radius:5px;background:#2B2F2D;color:var(--ink2);text-transform:uppercase}
@@ -172,7 +176,7 @@ function nextUpdate(){
 function bestPlays(){
   var list=[];
   (D.games.plays||[]).forEach(function(p){list.push({model:"GAME · TIER "+p.tier,when:p.game,title:p.bet+" "+p.price,detail:"Ours "+pct(p.model_p,1)+" · needs "+pct(p.breakeven,1),edge:p.edge,rating:p.rating,href:"#games",w:p.tier==="A"?3:p.tier==="B"?2:1});});
-  (D.sog.plays||[]).filter(function(p){return p.tier==="Bet";}).sort(byR).slice(0,6).forEach(function(p){list.push({model:"SHOTS · BET",when:p.team+" vs "+p.opp,title:p.player+" "+(p.side==="Under"?"Under "+p.line:p.category+" shots"),detail:"Proj "+(p.proj==null?"—":p.proj.toFixed(1))+" SOG · "+p.price+" "+p.book,edge:p.edge,rating:p.rating,href:"#shots",w:2});});
+  (D.sog.plays||[]).filter(function(p){return p.tier==="Bet";}).sort(byR).slice(0,6).forEach(function(p){list.push({model:"SHOTS · BET",when:p.team+" vs "+p.opp,title:p.player+" · "+p.bet,detail:"Chance "+pct(p.chance,1)+" vs need "+pct(p.need,1)+" · "+(p.side==="Under"?"U ":"O ")+p.line+" "+p.price+" "+p.book,edge:p.edge,rating:p.rating,href:"#shots",w:2});});
   (D.goals.date===D.today?(D.goals.picks||[]):[]).filter(function(p){return p.best&&p.rating!=null&&p.rating>=60;}).sort(byR).slice(0,3).forEach(function(p){list.push({model:"GOAL SCORER · VALUE",when:p.matchup,title:p.player+" to score "+p.best,detail:"Ours "+pct(p.prob)+" · fair "+p.fair+(p.book?" · "+p.book:""),edge:p.edge,rating:p.rating,href:"#goals",w:2});});
   list.sort(byR);
   return list.slice(0,6);
@@ -191,6 +195,12 @@ function viewToday(){
   });
   h+='</div></section>';
 
+  var tv=(D.sog.date===D.today?(D.sog.top||[]):[]).filter(function(o){return o.value;});
+  if(tv.length){
+    h+='<section><div class="secthead"><h2>70%+ shots plays with value</h2><a href="#shots" data-shottab-link="Top" class="sub">Top plays</a></div><div class="list">';
+    tv.slice(0,6).forEach(function(o){h+='<a class="li" href="#shots" data-shottab-link="Top"><div style="flex:1;min-width:0"><div style="font-weight:600">'+esc(o.player)+' · '+esc(o.bet)+'</div><div class="meta">'+esc((o.side==="Under"?"U ":"O ")+o.line+" "+o.price+" "+o.book+" · "+o.team+" vs "+o.opp)+'</div></div><div style="text-align:right"><div style="font-weight:700">'+pct(o.chance)+'</div><div class="meta">needs '+pct(o.need)+'</div></div></a>';});
+    h+='</div></section>';
+  }
   var gp=(D.goals.picks||[]).slice(0);
   if(gp.length){
     var seen={}, tops=[];
@@ -207,10 +217,10 @@ function viewToday(){
   });
   h+='</div></section>';
 
-  var nu=nextUpdate(), lr=D.games.record&&D.games.record.last_day_record, sv2=(D.sog.record||[]).filter(function(r){return r.label==="v2 Bets";})[0];
+  var nu=nextUpdate(), lr=D.games.record&&D.games.record.last_day_record, sv2=(D.sog.record||[]).filter(function(r){return D.sog.version&&r.label===D.sog.version+" Bets";})[0];
   h+='<section><div class="grid three">';
   h+='<div class="card"><div class="meta">Game model, last graded night</div><div class="big">'+wl(lr)+'</div><div class="meta">'+(lr?units(lr.units)+" · "+dayLabel(D.games.record.last_day):"No graded plays yet")+'</div></div>';
-  if(sv2) h+='<div class="card"><div class="meta">Shots model v2 bets, all time</div><div class="big">'+sv2.w+'–'+sv2.l+'</div><div class="meta" style="color:'+(sv2.units>=0?"var(--green)":"var(--ink2)")+'">'+units(sv2.units)+' · ROI '+sv2.roi+'%</div></div>';
+  if(sv2) h+='<div class="card"><div class="meta">Shots model '+esc(D.sog.version)+' bets, all time</div><div class="big">'+sv2.w+'–'+sv2.l+'</div><div class="meta" style="color:'+(sv2.units>=0?"var(--green)":"var(--ink2)")+'">'+units(sv2.units)+' · ROI '+sv2.roi+'%</div></div>';
   if(nu) h+='<div class="card"><div class="meta">Next update</div><div class="big">'+esc(nu.time)+'</div><div class="meta">'+esc(nu.what)+'</div></div>';
   h+='</div></section>';
   return h;
@@ -249,39 +259,85 @@ function viewGoals(){
 }
 
 /* ------------------------------------------------ SHOTS */
+function betPill(o){
+  var under=/fewer/.test(o.bet)||o.side==="Under";
+  return '<span class="tag '+(under?"w":"g")+'">'+esc(o.bet)+'</span>';
+}
+function lineTxt(o){return (o.side==="Under"?"Under ":"Over ")+esc(o.line);}
+function chanceVsNeed(o){
+  return '<div class="cvn"><div><div class="k">Chance</div><div class="v">'+pct(o.chance,1)+'</div></div><div class="vs">vs</div><div><div class="k">Need</div><div class="v mute">'+(o.need==null?"—":pct(o.need,1))+'</div></div><div class="grow"></div><div style="text-align:right"><div class="k">Rating</div>'+rate(o.rating,24)+'</div></div>';
+}
+function splitTxt(o){
+  var parts=[];
+  if(o.model_only!=null) parts.push("Model "+pct(o.model_only));
+  if(o.market!=null) parts.push("Market "+pct(o.market));
+  return parts.length?'<div class="note">'+parts.join(" · ")+' (chance blends them 70/30)</div>':"";
+}
+function shotCard(r){
+  var chips=[];
+  if(r.proj!=null) chips.push("Proj "+r.proj.toFixed(2)+" SOG");
+  if(r.l10!=null) chips.push("Last 10 avg "+r.l10.toFixed(1));
+  if(r.toi!=null) chips.push(r.toi.toFixed(1)+" min");
+  if(r.per60!=null) chips.push(r.per60.toFixed(1)+" shots/60");
+  if(r.edge!=null) chips.push("Edge "+pts(r.edge)+" pts");
+  if(r.ev!=null) chips.push("EV "+(r.ev>=0?"+":"")+(r.ev*100).toFixed(1)+"%");
+  if(r.note) chips.push(r.note);
+  return '<article class="card"><div class="row top-align"><div style="min-width:0"><div class="name">'+esc(r.player)+'</div><div class="meta">'+esc(r.pos+" · "+r.team+" vs "+r.opp)+'</div></div><div style="text-align:right;flex-shrink:0">'+betPill(r)+'<div class="meta" style="margin-top:6px">'+lineTxt(r)+' <b style="color:var(--ink)">'+esc(r.price)+'</b> '+esc(r.book)+'</div></div></div>'+
+    chanceVsNeed(r)+splitTxt(r)+
+    '<div class="chips">'+chips.map(function(c){return '<span class="chip">'+esc(c)+'</span>';}).join("")+'</div></article>';
+}
+function optTable(list,showTag){
+  var h='<div class="tbl"><table><thead><tr><th>Player</th><th class="n">Chance</th><th class="n">Price</th><th class="n hide-m">Need</th><th class="n">Rating</th></tr></thead><tbody>';
+  list.forEach(function(o){
+    var tag=showTag?(o.value?'<span class="tag g">Value</span>':'<span class="tag">Overpriced</span>'):(o.value?'<span class="tag g">Value</span>':"");
+    h+='<tr class="'+(o.value?"hit":"")+'"><td><div style="font-weight:600;display:flex;gap:6px;align-items:center;flex-wrap:wrap">'+esc(o.player)+' '+tag+'</div><div class="meta">'+esc(o.bet+" · "+(o.side==="Under"?"U ":"O ")+o.line+" · "+o.team+" vs "+o.opp+(o.proj!=null?" · proj "+o.proj.toFixed(2):""))+'</div></td><td class="n" style="font-weight:700">'+pct(o.chance)+'</td><td class="n">'+esc(o.price)+'<div class="meta">'+esc(o.book)+'</div></td><td class="n hide-m">'+(o.need==null?"—":pct(o.need))+'</td><td class="n" style="font-weight:700;color:'+(o.rating>=75?"var(--green)":o.rating>=50?"var(--ink)":"var(--mute)")+'">'+(o.rating==null?"—":o.rating)+'</td></tr>';
+  });
+  return h+'</tbody></table></div>';
+}
 function viewShots(){
   var S=D.sog, h="";
-  h+='<section style="margin-top:6px"><div class="sub">'+esc(S.date?dayLabel(S.date,true)+" · updated "+timeLabel(S.updated):"")+'</div><h1>Shots on goal</h1>'+(S.date&&S.date!==D.today?'<div class="warn"><span class="dot old" style="margin-top:5px"></span><span>From '+esc(dayLabel(S.date))+'.</span></div>':"")+'</section>';
-  h+='<section><div class="seg" role="tablist" aria-label="Play type">';
-  [["Bets","Bets"],["Leans","Leans"],["Unders","Unders"],["Overs","Overs board"]].forEach(function(t){h+='<button type="button" role="tab" data-shottab="'+t[0]+'" aria-selected="'+(ui.shotTab===t[0])+'">'+t[1]+'</button>';});
+  var opts=(S.options&&S.options.length)?S.options:(S.board||[]);
+  var tabs=[["Top","Top plays"],["Bets","Bets"],["Leans","Leans"],["More","More options"]];
+  if(["Top","Bets","Leans","More"].indexOf(ui.shotTab)<0) ui.shotTab="Bets";
+  h+='<section style="margin-top:6px"><div class="sub">'+esc((S.date?dayLabel(S.date,true)+" · updated "+timeLabel(S.updated):"")+(S.version?" · model "+S.version:""))+'</div><h1>Shots on goal</h1>'+(S.date&&S.date!==D.today?'<div class="warn"><span class="dot old" style="margin-top:5px"></span><span>From '+esc(dayLabel(S.date))+'.</span></div>':"")+'</section>';
+  h+='<section><div class="seg" role="tablist" aria-label="Section">';
+  tabs.forEach(function(t){var n=t[0]==="Top"?(S.top||[]).length:t[0]==="Bets"?(S.plays||[]).filter(function(p){return p.tier==="Bet";}).length:t[0]==="Leans"?(S.plays||[]).filter(function(p){return p.tier==="Lean";}).length:null;h+='<button type="button" role="tab" data-shottab="'+t[0]+'" aria-selected="'+(ui.shotTab===t[0])+'">'+t[1]+(n!=null?' <span style="opacity:.7">'+n+'</span>':"")+'</button>';});
   h+='</div>';
-  if(ui.shotTab==="Overs"){
-    var cats=["All","2+","3+","4+"];
-    h+='<div class="filters" role="group" aria-label="Shots">';cats.forEach(function(c){h+='<button type="button" data-boardcat="'+c+'" aria-pressed="'+(ui.boardCat===c)+'">'+(c==="All"?"All":c+" shots")+'</button>';});h+='</div>';
-    var b=(S.board||[]).filter(function(r){return ui.boardCat==="All"||r.category===ui.boardCat;});
-    h+='<div class="sub">Best Over chances, value or not. Take at = shortest odds still worth betting.</div>';
-    if(!b.length) h+='<div class="empty">No board yet.</div>';
+
+  if(ui.shotTab==="Top"){
+    var top=S.top||[];
+    h+='<div class="explain"><b>Top plays</b> are bets the model gives a <b>70%+ chance</b> at -400 or better. <span class="tag g">Value</span> means the chance beats what the price needs. <span class="tag">Overpriced</span> means it will probably hit, but the price costs you money over time. In the Oct 22–27 backtest, Top plays with value went 20–5 (+2.7u); all Top plays won 74% but lost 3.9u.</div>';
+    if(!top.length) h+='<div class="empty">No Top plays in this run.</div>';
     else{
-      h+='<div class="tbl"><table><thead><tr><th>Player</th><th class="n">Chance</th><th class="n hide-m">Fair</th><th class="n">Take at</th><th class="n">Best</th><th class="n">Rating</th></tr></thead><tbody>';
-      b.slice(0,ui.shotShow*2).forEach(function(r){h+='<tr class="'+(r.tier==="Bet"||r.tier==="Lean"?"hit":"")+'"><td><div style="font-weight:600">'+esc(r.player)+'</div><div class="meta">'+esc(r.category+" shots · "+r.team+" vs "+r.opp+(r.tier&&r.tier!=="No value"?" · "+r.tier:""))+'</div></td><td class="n">'+pct(r.chance)+'</td><td class="n hide-m">'+esc(r.fair)+'</td><td class="n">'+esc(r.take_at)+'</td><td class="n">'+esc(r.best_price)+'<div class="meta">'+esc(r.book)+'</div></td><td class="n">'+(r.rating==null?"—":'<b class="'+(r.rating>=75?"":"")+'" style="color:'+(r.rating>=75?"var(--green)":"var(--ink)")+'">'+r.rating+'</b>')+'</td></tr>';});
-      h+='</tbody></table></div>';
-      if(b.length>ui.shotShow*2) h+='<button class="more" type="button" data-shotmore="1">Show more</button>';
+      var v=top.filter(function(o){return o.value;}), op=top.filter(function(o){return !o.value;});
+      if(v.length){h+='<h2 style="font-size:18px">With value · '+v.length+'</h2>'+optTable(v,true);}
+      if(op.length){h+='<h2 style="font-size:18px;margin-top:8px">Overpriced · '+op.length+'</h2>'+optTable(op,true);}
     }
     return h+'</section>';
   }
-  var list=(S.plays||[]).filter(function(p){return ui.shotTab==="Unders"?p.side==="Under":p.tier===(ui.shotTab==="Bets"?"Bet":"Lean");});
-  var blurb={Bets:"Ranked by rating",Leans:"Smaller edges, 1.5 to 3 points",Unders:"Every Under with edge, bets and leans"}[ui.shotTab];
-  h+='<div class="sub">'+list.length+' play'+(list.length===1?"":"s")+' · '+esc(blurb)+'</div>';
-  if(!list.length) h+='<div class="empty">Nothing here right now.</div>';
+
+  if(ui.shotTab==="More"){
+    var bets=[];opts.forEach(function(o){if(bets.indexOf(o.bet)<0)bets.push(o.bet);});
+    bets.sort(function(a,b){function k(x){var m=/^(\d+)\+/.exec(x);if(m)return +m[1];m=/^(\d+) or fewer/.exec(x);return m?100+(+m[1]):200;}return k(a)-k(b);});
+    if(bets.indexOf(ui.boardCat)<0) ui.boardCat=bets[0]||"";
+    h+='<div class="sub">The best chances at every line the books post, value or not. Green rows have value.</div>';
+    h+='<div class="filters" role="group" aria-label="Bet">';bets.forEach(function(b){h+='<button type="button" data-boardcat="'+esc(b)+'" aria-pressed="'+(ui.boardCat===b)+'">'+esc(b)+'</button>';});h+='</div>';
+    var list=opts.filter(function(o){return o.bet===ui.boardCat;});
+    h+=list.length?optTable(list,false):'<div class="empty">No options yet.</div>';
+    return h+'</section>';
+  }
+
+  var tier=ui.shotTab==="Bets"?"Bet":"Lean";
+  var side=ui.shotSide||"All";
+  var base=(S.plays||[]).filter(function(p){return p.tier===tier;});
+  var list2=base.filter(function(p){return side==="All"||p.side===side;});
+  h+='<div class="explain">'+(tier==="Bet"?"<b>Bets</b> have 3+ points of edge: the chance beats what the price needs by at least 3 points.":"<b>Leans</b> have a smaller edge, under 3 points. They've been streaky, so stake smaller or skip.")+' Each player is listed once, at the line where he has value. Ranked by rating.</div>';
+  h+='<div class="filters" role="group" aria-label="Over or Under">';["All","Over","Under"].forEach(function(sd){var n=sd==="All"?base.length:base.filter(function(p){return p.side===sd;}).length;h+='<button type="button" data-shotside="'+sd+'" aria-pressed="'+(side===sd)+'">'+(sd==="All"?"All":sd+"s")+' '+n+'</button>';});h+='</div>';
+  if(!list2.length) h+='<div class="empty">Nothing here right now.</div>';
   h+='<div class="grid two">';
-  list.slice(0,ui.shotShow).forEach(function(r){
-    var bet=r.side==="Under"?"Under "+r.line:r.category+" shots";
-    h+='<article class="card"><div class="row top-align"><div style="min-width:0"><div class="name">'+esc(r.player)+'</div><div class="meta">'+esc(r.team+" · "+r.pos+" · vs "+r.opp+(r.book?" · "+r.book:""))+'</div></div><span class="tag '+(r.side==="Under"?"w":"g")+'">'+esc(bet)+'</span></div>'+
-      '<div class="stats4"><div><div class="k">Proj SOG</div><div class="v">'+(r.proj==null?"—":r.proj.toFixed(1))+'</div></div><div><div class="k">Chance</div><div class="v">'+pct(r.model_p,1)+'</div></div><div><div class="k">Price</div><div class="v">'+esc(r.price)+'</div></div><div><div class="k">Rating</div><div class="v">'+rate(r.rating,21)+'</div></div></div>'+
-      '<div class="chips"><span class="chip">Edge '+pts(r.edge)+'</span><span class="chip">Needs '+pct(r.breakeven,1)+'</span>'+(r.l10!=null?'<span class="chip">Last 10 avg '+r.l10.toFixed(1)+'</span>':"")+(r.toi!=null?'<span class="chip">'+r.toi.toFixed(1)+' TOI</span>':"")+(r.tier==="Lean"&&ui.shotTab==="Unders"?'<span class="chip">Lean</span>':"")+(r.note?'<span class="chip">'+esc(r.note)+'</span>':"")+'</div></article>';
-  });
+  list2.slice(0,ui.shotShow).forEach(function(r){h+=shotCard(r);});
   h+='</div>';
-  if(list.length>ui.shotShow) h+='<button class="more" type="button" data-shotmore="1">Show more ('+(list.length-ui.shotShow)+' left)</button>';
+  if(list2.length>ui.shotShow) h+='<button class="more" type="button" data-shotmore="1">Show more ('+(list2.length-ui.shotShow)+' left)</button>';
   return h+'</section>';
 }
 
@@ -359,12 +415,14 @@ function render(keepScroll){
   if(keepScroll) window.scrollTo(0,y);
 }
 document.addEventListener("click",function(e){
-  var b=e.target.closest("[data-goalgame],[data-goalmore],[data-shottab],[data-boardcat],[data-shotmore],[data-game]");
+  var b=e.target.closest("[data-goalgame],[data-goalmore],[data-shottab],[data-boardcat],[data-shotside],[data-shotmore],[data-game]");
+  var lk=e.target.closest("[data-shottab-link]");if(lk){ui.shotTab=lk.dataset.shottabLink;save();}
   if(!b) return;
   if(b.dataset.goalgame!=null){ui.goalGame=b.dataset.goalgame;ui.goalShow=30;}
   else if(b.dataset.goalmore){ui.goalShow+=30;}
   else if(b.dataset.shottab){ui.shotTab=b.dataset.shottab;ui.shotShow=30;save();}
   else if(b.dataset.boardcat){ui.boardCat=b.dataset.boardcat;save();}
+  else if(b.dataset.shotside){ui.shotSide=b.dataset.shotside;ui.shotShow=30;}
   else if(b.dataset.shotmore){ui.shotShow+=30;}
   else if(b.dataset.game!=null){ui.game=+b.dataset.game;if(b.tagName==="A")return;}
   render(true);
