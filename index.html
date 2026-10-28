@@ -138,7 +138,7 @@ footer{margin-top:32px;font-size:12px;color:var(--mute);line-height:1.6}
 <script>
 (function(){
 "use strict";
-var D=null, ui={goalGame:"All", goalShow:30, shotTab:"Bets", boardCat:"All", shotShow:30, game:0};
+var D=null, ui={goalGame:"All", goalShow:30, shotTab:"Best", boardCat:"2+ shots", shotShow:30, game:0};
 try{var s=JSON.parse(localStorage.getItem("goat_ui")||"{}");if(s.shotTab)ui.shotTab=s.shotTab;if(s.boardCat)ui.boardCat=s.boardCat;}catch(e){}
 function save(){try{localStorage.setItem("goat_ui",JSON.stringify({shotTab:ui.shotTab,boardCat:ui.boardCat}));}catch(e){}}
 
@@ -197,8 +197,8 @@ function viewToday(){
 
   var tv=(D.sog.date===D.today?(D.sog.top||[]):[]).filter(function(o){return o.value;});
   if(tv.length){
-    h+='<section><div class="secthead"><h2>70%+ shots plays with value</h2><a href="#shots" data-shottab-link="Top" class="sub">Top plays</a></div><div class="list">';
-    tv.slice(0,6).forEach(function(o){h+='<a class="li" href="#shots" data-shottab-link="Top"><div style="flex:1;min-width:0"><div style="font-weight:600">'+esc(o.player)+' · '+esc(o.bet)+'</div><div class="meta">'+esc((o.side==="Under"?"U ":"O ")+o.line+" "+o.price+" "+o.book+" · "+o.team+" vs "+o.opp)+'</div></div><div style="text-align:right"><div style="font-weight:700">'+pct(o.chance)+'</div><div class="meta">needs '+pct(o.need)+'</div></div></a>';});
+    h+='<section><div class="secthead"><h2>70%+ shots plays with value</h2><a href="#shots" data-shottab-link="Best" class="sub">Best bets</a></div><div class="list">';
+    tv.slice(0,6).forEach(function(o){h+='<a class="li" href="#shots" data-shottab-link="Best"><div style="flex:1;min-width:0"><div style="font-weight:600">'+esc(o.player)+' · '+esc(o.bet)+'</div><div class="meta">'+esc((o.side==="Under"?"U ":"O ")+o.line+" "+o.price+" "+o.book+" · "+o.team+" vs "+o.opp)+'</div></div><div style="text-align:right"><div style="font-weight:700">'+pct(o.chance)+'</div><div class="meta">needs '+pct(o.need)+'</div></div></a>';});
     h+='</div></section>';
   }
   var gp=(D.goals.picks||[]).slice(0);
@@ -273,7 +273,7 @@ function splitTxt(o){
   if(o.market!=null) parts.push("Market "+pct(o.market));
   return parts.length?'<div class="note">'+parts.join(" · ")+' (chance blends them 70/30)</div>':"";
 }
-function shotCard(r){
+function shotCard(r,rank){
   var chips=[];
   if(r.proj!=null) chips.push("Proj "+r.proj.toFixed(2)+" SOG");
   if(r.l10!=null) chips.push("Last 10 avg "+r.l10.toFixed(1));
@@ -282,7 +282,8 @@ function shotCard(r){
   if(r.edge!=null) chips.push("Edge "+pts(r.edge)+" pts");
   if(r.ev!=null) chips.push("EV "+(r.ev>=0?"+":"")+(r.ev*100).toFixed(1)+"%");
   if(r.note) chips.push(r.note);
-  return '<article class="card"><div class="row top-align"><div style="min-width:0"><div class="name">'+esc(r.player)+'</div><div class="meta">'+esc(r.pos+" · "+r.team+" vs "+r.opp)+'</div></div><div style="text-align:right;flex-shrink:0">'+betPill(r)+'<div class="meta" style="margin-top:6px">'+lineTxt(r)+' <b style="color:var(--ink)">'+esc(r.price)+'</b> '+esc(r.book)+'</div></div></div>'+
+  var srcTag=r.src?'<span class="tag'+(/70/.test(r.src)?" g":"")+'" style="margin-left:6px;font-size:10px">'+esc(r.src)+'</span>':(r.tier?'<span class="tag" style="margin-left:6px;font-size:10px">'+esc(r.tier)+'</span>':"");
+  return '<article class="card"><div class="row top-align"><div style="display:flex;gap:10px;min-width:0">'+(rank?'<div class="tier C" style="background:var(--card2);color:var(--mute)">'+rank+'</div>':"")+'<div style="min-width:0"><div class="name">'+esc(r.player)+srcTag+'</div><div class="meta">'+esc(r.pos+" · "+r.team+" vs "+r.opp)+'</div></div></div><div style="text-align:right;flex-shrink:0">'+betPill(r)+'<div class="meta" style="margin-top:6px">'+lineTxt(r)+' <b style="color:var(--ink)">'+esc(r.price)+'</b> '+esc(r.book)+'</div></div></div>'+
     chanceVsNeed(r)+splitTxt(r)+
     '<div class="chips">'+chips.map(function(c){return '<span class="chip">'+esc(c)+'</span>';}).join("")+'</div></article>';
 }
@@ -297,42 +298,49 @@ function optTable(list,showTag){
 function viewShots(){
   var S=D.sog, h="";
   var opts=(S.options&&S.options.length)?S.options:(S.board||[]);
-  var tabs=[["Top","Top plays"],["Bets","Bets"],["Leans","Leans"],["More","More options"]];
-  if(["Top","Bets","Leans","More"].indexOf(ui.shotTab)<0) ui.shotTab="Bets";
+  var tabs=[["Best","Best bets"],["Overs","Overs board"],["All","All plays"]];
+  if(["Best","Overs","All"].indexOf(ui.shotTab)<0) ui.shotTab="Best";
   h+='<section style="margin-top:6px"><div class="sub">'+esc((S.date?dayLabel(S.date,true)+" · updated "+timeLabel(S.updated):"")+(S.version?" · model "+S.version:""))+'</div><h1>Shots on goal</h1>'+(S.date&&S.date!==D.today?'<div class="warn"><span class="dot old" style="margin-top:5px"></span><span>From '+esc(dayLabel(S.date))+'.</span></div>':"")+'</section>';
-  h+='<section><div class="seg" role="tablist" aria-label="Section">';
-  tabs.forEach(function(t){var n=t[0]==="Top"?(S.top||[]).length:t[0]==="Bets"?(S.plays||[]).filter(function(p){return p.tier==="Bet";}).length:t[0]==="Leans"?(S.plays||[]).filter(function(p){return p.tier==="Lean";}).length:null;h+='<button type="button" role="tab" data-shottab="'+t[0]+'" aria-selected="'+(ui.shotTab===t[0])+'">'+t[1]+(n!=null?' <span style="opacity:.7">'+n+'</span>':"")+'</button>';});
+  h+='<section><div class="seg" role="tablist" aria-label="Section" style="grid-template-columns:repeat(3,minmax(0,1fr))">';
+  tabs.forEach(function(t){h+='<button type="button" role="tab" data-shottab="'+t[0]+'" aria-selected="'+(ui.shotTab===t[0])+'">'+t[1]+'</button>';});
   h+='</div>';
 
-  if(ui.shotTab==="Top"){
-    var top=S.top||[];
-    h+='<div class="explain"><b>Top plays</b> are bets the model gives a <b>70%+ chance</b> at -400 or better. <span class="tag g">Value</span> means the chance beats what the price needs. <span class="tag">Overpriced</span> means it will probably hit, but the price costs you money over time. In the Oct 22–27 backtest, Top plays with value went 20–5 (+2.7u); all Top plays won 74% but lost 3.9u.</div>';
-    if(!top.length) h+='<div class="empty">No Top plays in this run.</div>';
+  if(ui.shotTab==="Best"){
+    var seen={}, best=[];
+    (S.plays||[]).filter(function(p){return p.tier==="Bet";}).forEach(function(p){var k=p.player+"|"+p.bet;if(!seen[k]){seen[k]=1;best.push(Object.assign({src:"Bet"},p));}});
+    (S.top||[]).filter(function(o){return o.value;}).forEach(function(o){var k=o.player+"|"+o.bet;if(!seen[k]){seen[k]=1;best.push(Object.assign({src:"70%+ value"},o));}else{best.forEach(function(b){if(b.player+"|"+b.bet===k)b.src="Bet · 70%+";});}});
+    best.sort(byR);
+    h+='<div class="explain"><b>Best bets</b> are the top picks overall: every <b>Bet</b> (3+ points of edge) plus every <b>70%+ play with value</b>, ranked by rating.</div>';
+    if(!best.length) h+='<div class="empty">No best bets in this run.</div>';
+    h+='<div class="grid two">';
+    best.slice(0,ui.shotShow).forEach(function(r,i){h+=shotCard(r,i+1);});
+    h+='</div>';
+    if(best.length>ui.shotShow) h+='<button class="more" type="button" data-shotmore="1">Show more ('+(best.length-ui.shotShow)+' left)</button>';
+    return h+'</section>';
+  }
+
+  if(ui.shotTab==="Overs"){
+    var cats=["1+ shots","2+ shots","3+ shots","4+ shots"];
+    if(cats.indexOf(ui.boardCat)<0) ui.boardCat="2+ shots";
+    h+='<div class="explain">The <b>Overs board</b> lists the best Over chances at each line, value or not. Green rows have value. <b>Take at</b> is the shortest odds still worth betting (3 points better than fair).</div>';
+    h+='<div class="filters" role="group" aria-label="Shots">';cats.forEach(function(c){var n=opts.filter(function(o){return o.bet===c&&o.side!=="Under";}).length;h+='<button type="button" data-boardcat="'+c+'" aria-pressed="'+(ui.boardCat===c)+'">'+c.replace(" shots","")+' <span style="opacity:.7">'+n+'</span></button>';});h+='</div>';
+    var list=opts.filter(function(o){return o.bet===ui.boardCat&&o.side!=="Under";}).sort(function(a,b){return (b.chance||0)-(a.chance||0);});
+    if(!list.length) h+='<div class="empty">No Overs posted at this line yet.</div>';
     else{
-      var v=top.filter(function(o){return o.value;}), op=top.filter(function(o){return !o.value;});
-      if(v.length){h+='<h2 style="font-size:18px">With value · '+v.length+'</h2>'+optTable(v,true);}
-      if(op.length){h+='<h2 style="font-size:18px;margin-top:8px">Overpriced · '+op.length+'</h2>'+optTable(op,true);}
+      h+='<div class="tbl"><table><thead><tr><th>Player</th><th class="n">Chance</th><th class="n">Fair</th><th class="n hide-m">Take at</th><th class="n">Best</th><th class="n">Rating</th></tr></thead><tbody>';
+      list.forEach(function(o){h+='<tr class="'+(o.value?"hit":"")+'"><td><div style="font-weight:600;display:flex;gap:6px;align-items:center;flex-wrap:wrap">'+esc(o.player)+(o.value?' <span class="tag g">Value</span>':"")+'</div><div class="meta">'+esc(o.pos+" · "+o.team+" vs "+o.opp+(o.proj!=null?" · proj "+o.proj.toFixed(2):""))+'</div></td><td class="n" style="font-weight:700">'+pct(o.chance)+'</td><td class="n">'+esc(o.fair||"—")+'</td><td class="n hide-m">'+esc(o.take_at||"—")+'</td><td class="n">'+esc(o.price)+'<div class="meta">'+esc(o.book)+'</div></td><td class="n" style="font-weight:700;color:'+(o.rating>=75?"var(--green)":o.rating>=50?"var(--ink)":"var(--mute)")+'">'+(o.rating==null?"—":o.rating)+'</td></tr>';});
+      h+='</tbody></table></div>';
     }
     return h+'</section>';
   }
 
-  if(ui.shotTab==="More"){
-    var bets=[];opts.forEach(function(o){if(bets.indexOf(o.bet)<0)bets.push(o.bet);});
-    bets.sort(function(a,b){function k(x){var m=/^(\d+)\+/.exec(x);if(m)return +m[1];m=/^(\d+) or fewer/.exec(x);return m?100+(+m[1]):200;}return k(a)-k(b);});
-    if(bets.indexOf(ui.boardCat)<0) ui.boardCat=bets[0]||"";
-    h+='<div class="sub">The best chances at every line the books post, value or not. Green rows have value.</div>';
-    h+='<div class="filters" role="group" aria-label="Bet">';bets.forEach(function(b){h+='<button type="button" data-boardcat="'+esc(b)+'" aria-pressed="'+(ui.boardCat===b)+'">'+esc(b)+'</button>';});h+='</div>';
-    var list=opts.filter(function(o){return o.bet===ui.boardCat;});
-    h+=list.length?optTable(list,false):'<div class="empty">No options yet.</div>';
-    return h+'</section>';
-  }
-
-  var tier=ui.shotTab==="Bets"?"Bet":"Lean";
-  var side=ui.shotSide||"All";
-  var base=(S.plays||[]).filter(function(p){return p.tier===tier;});
-  var list2=base.filter(function(p){return side==="All"||p.side===side;});
-  h+='<div class="explain">'+(tier==="Bet"?"<b>Bets</b> have 3+ points of edge: the chance beats what the price needs by at least 3 points.":"<b>Leans</b> have a smaller edge, under 3 points. They've been streaky, so stake smaller or skip.")+' Each player is listed once, at the line where he has value. Ranked by rating.</div>';
-  h+='<div class="filters" role="group" aria-label="Over or Under">';["All","Over","Under"].forEach(function(sd){var n=sd==="All"?base.length:base.filter(function(p){return p.side===sd;}).length;h+='<button type="button" data-shotside="'+sd+'" aria-pressed="'+(side===sd)+'">'+(sd==="All"?"All":sd+"s")+' '+n+'</button>';});h+='</div>';
+  var tier=ui.shotTier||"All", side=ui.shotSide||"All";
+  var base=(S.plays||[]);
+  var list2=base.filter(function(p){return (tier==="All"||p.tier===tier)&&(side==="All"||p.side===side);});
+  h+='<div class="explain">Every play from the model. <b>Bets</b> have 3+ points of edge; <b>Leans</b> have less and have been streaky, so stake smaller or skip.</div>';
+  h+='<div class="filters" role="group" aria-label="Bet or Lean">';[["All","All"],["Bet","Bets"],["Lean","Leans"]].forEach(function(t){var n=base.filter(function(p){return t[0]==="All"||p.tier===t[0];}).length;h+='<button type="button" data-shottier="'+t[0]+'" aria-pressed="'+(tier===t[0])+'">'+t[1]+' '+n+'</button>';});
+  ["Over","Under"].forEach(function(sd){h+='<button type="button" data-shotside="'+(side===sd?"All":sd)+'" aria-pressed="'+(side===sd)+'">'+sd+'s only</button>';});
+  h+='</div>';
   if(!list2.length) h+='<div class="empty">Nothing here right now.</div>';
   h+='<div class="grid two">';
   list2.slice(0,ui.shotShow).forEach(function(r){h+=shotCard(r);});
@@ -415,7 +423,7 @@ function render(keepScroll){
   if(keepScroll) window.scrollTo(0,y);
 }
 document.addEventListener("click",function(e){
-  var b=e.target.closest("[data-goalgame],[data-goalmore],[data-shottab],[data-boardcat],[data-shotside],[data-shotmore],[data-game]");
+  var b=e.target.closest("[data-goalgame],[data-goalmore],[data-shottab],[data-boardcat],[data-shotside],[data-shottier],[data-shotmore],[data-game]");
   var lk=e.target.closest("[data-shottab-link]");if(lk){ui.shotTab=lk.dataset.shottabLink;save();}
   if(!b) return;
   if(b.dataset.goalgame!=null){ui.goalGame=b.dataset.goalgame;ui.goalShow=30;}
@@ -423,6 +431,7 @@ document.addEventListener("click",function(e){
   else if(b.dataset.shottab){ui.shotTab=b.dataset.shottab;ui.shotShow=30;save();}
   else if(b.dataset.boardcat){ui.boardCat=b.dataset.boardcat;save();}
   else if(b.dataset.shotside){ui.shotSide=b.dataset.shotside;ui.shotShow=30;}
+  else if(b.dataset.shottier){ui.shotTier=b.dataset.shottier;ui.shotShow=30;}
   else if(b.dataset.shotmore){ui.shotShow+=30;}
   else if(b.dataset.game!=null){ui.game=+b.dataset.game;if(b.tagName==="A")return;}
   render(true);
