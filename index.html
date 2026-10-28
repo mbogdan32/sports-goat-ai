@@ -109,6 +109,18 @@ tr.hit td{background:#0F2015}
 .cvn .k{font-size:11px;color:var(--mute)}.cvn .v{font:italic 900 24px/1.1 var(--display)}.cvn .v.mute{color:var(--ink2)}.cvn .vs{font-size:12px;color:var(--mute);padding-bottom:4px}.cvn .grow{flex:1}
 .explain{font-size:13px;line-height:1.5;color:var(--ink2);padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:#0A100C}
 .explain .tag{font-size:10px;padding:2px 6px}
+.ocard{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.ocard.val{border-color:#2A6A34;background:linear-gradient(0deg,#0D130F,#0D130F)}
+.ocard .rank{width:26px;height:26px;border-radius:7px;background:var(--card2);color:var(--mute);display:flex;align-items:center;justify-content:center;font:900 15px var(--display);flex-shrink:0}
+.ocard .bar{position:relative;overflow:visible}
+.ocard .bar>div{border-radius:3px}
+.ocard .bar i{position:absolute;top:-3px;width:2px;height:11px;background:var(--white);border-radius:1px}
+.ostats{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}
+@media (max-width:420px){.ostats b{font-size:14px}.ostats em{font-size:10px}}
+.ostats div{display:flex;flex-direction:column;gap:1px;min-width:0}
+.ostats span{font-size:11px;color:var(--mute)}
+.ostats b{font-size:15px;font-weight:700;color:var(--ink);white-space:nowrap}
+.ostats em{font-style:normal;font-size:11px;color:var(--mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .tier{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font:900 18px var(--display);color:#050706;flex-shrink:0;background:var(--green)}
 .tier.B{background:var(--ink2)}.tier.C{background:#6B776F}
 .goalie-st{font-size:10px;font-weight:700;letter-spacing:.6px;padding:3px 6px;border-radius:5px;background:#2B2F2D;color:var(--ink2);text-transform:uppercase}
@@ -322,14 +334,27 @@ function viewShots(){
   if(ui.shotTab==="Overs"){
     var cats=["1+ shots","2+ shots","3+ shots","4+ shots"];
     if(cats.indexOf(ui.boardCat)<0) ui.boardCat="2+ shots";
-    h+='<div class="explain">The <b>Overs board</b> lists the best Over chances at each line, value or not. Green rows have value. <b>Take at</b> is the shortest odds still worth betting (3 points better than fair).</div>';
+    h+='<div class="explain">The <b>Overs board</b> lists the best Over chances at each line, value or not. Green-bordered cards have value. The white tick on the bar is the chance the price needs. <b>Take at</b> is the shortest odds still worth betting (3 points better than fair).</div>';
     h+='<div class="filters" role="group" aria-label="Shots">';cats.forEach(function(c){var n=opts.filter(function(o){return o.bet===c&&o.side!=="Under";}).length;h+='<button type="button" data-boardcat="'+c+'" aria-pressed="'+(ui.boardCat===c)+'">'+c.replace(" shots","")+' <span style="opacity:.7">'+n+'</span></button>';});h+='</div>';
     var list=opts.filter(function(o){return o.bet===ui.boardCat&&o.side!=="Under";}).sort(function(a,b){return (b.chance||0)-(a.chance||0);});
     if(!list.length) h+='<div class="empty">No Overs posted at this line yet.</div>';
     else{
-      h+='<div class="tbl"><table><thead><tr><th>Player</th><th class="n">Chance</th><th class="n">Fair</th><th class="n hide-m">Take at</th><th class="n">Best</th><th class="n">Rating</th></tr></thead><tbody>';
-      list.forEach(function(o){h+='<tr class="'+(o.value?"hit":"")+'"><td><div style="font-weight:600;display:flex;gap:6px;align-items:center;flex-wrap:wrap">'+esc(o.player)+(o.value?' <span class="tag g">Value</span>':"")+'</div><div class="meta">'+esc(o.pos+" · "+o.team+" vs "+o.opp+(o.proj!=null?" · proj "+o.proj.toFixed(2):""))+'</div></td><td class="n" style="font-weight:700">'+pct(o.chance)+'</td><td class="n">'+esc(o.fair||"—")+'</td><td class="n hide-m">'+esc(o.take_at||"—")+'</td><td class="n">'+esc(o.price)+'<div class="meta">'+esc(o.book)+'</div></td><td class="n" style="font-weight:700;color:'+(o.rating>=75?"var(--green)":o.rating>=50?"var(--ink)":"var(--mute)")+'">'+(o.rating==null?"—":o.rating)+'</td></tr>';});
-      h+='</tbody></table></div>';
+      h+='<div class="grid two">';
+      list.forEach(function(o,i){
+        var need=o.need!=null?o.need:null;
+        h+='<article class="ocard'+(o.value?" val":"")+'">'+
+          '<div class="row top-align"><div style="display:flex;gap:10px;min-width:0"><div class="rank">'+(i+1)+'</div><div style="min-width:0"><div class="name" style="font-size:15px">'+esc(o.player)+(o.value?' <span class="tag g" style="font-size:10px;margin-left:4px">Value</span>':"")+'</div><div class="meta">'+esc(o.pos+" · "+o.team+" vs "+o.opp+(o.proj!=null?" · proj "+o.proj.toFixed(2)+" SOG":""))+'</div></div></div>'+
+          '<div style="text-align:right;flex-shrink:0"><div class="big" style="font-size:26px">'+pct(o.chance)+'</div><div class="meta">chance</div></div></div>'+
+          '<div class="bar" style="height:5px"><div style="width:'+Math.round((o.chance||0)*100)+'%"></div>'+(need!=null?'<i style="left:'+Math.round(need*100)+'%"></i>':"")+'</div>'+
+          '<div class="ostats">'+
+            '<div><span>Best price</span><b>'+esc(o.price||"—")+'</b><em>'+esc(o.book||"")+'</em></div>'+
+            '<div><span>Needs</span><b>'+(need!=null?pct(need):"—")+'</b><em>to win</em></div>'+
+            '<div><span>Fair</span><b>'+esc(o.fair||"—")+'</b><em>no vig</em></div>'+
+            '<div><span>Take at</span><b>'+esc(o.take_at||"—")+'</b><em>or better</em></div>'+
+            '<div><span>Rating</span><b style="color:'+(o.rating>=75?"var(--green)":o.rating>=50?"var(--white)":"var(--mute)")+'">'+(o.rating==null?"—":o.rating)+'</b><em>/100</em></div>'+
+          '</div></article>';
+      });
+      h+='</div>';
     }
     return h+'</section>';
   }
