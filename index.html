@@ -403,7 +403,7 @@ function render(keep){
   document.getElementById("app").innerHTML=rt.game?viewGame(rt.game):views[rt.tab]();
   var fresh=ago(D.generated_at)<6;
   document.getElementById("upd").innerHTML='<span class="dot'+(fresh?"":" old")+'"></span>'+esc(timeLabel(D.generated_at));
-  document.getElementById("foot").innerHTML='Updated '+esc(dayLabel(D.generated_at.slice(0,10))+", "+timeLabel(D.generated_at))+' · updates after every model run<br>Model chances, not guarantees. 21+. Problem gambling help: 1-800-GAMBLER.';
+  document.getElementById("foot").innerHTML='Updated '+esc(dayLabel(D.generated_at.slice(0,10))+", "+timeLabel(D.generated_at))+' · updates after every model run<br>Full reports: <a href="reports/goals.html">Goal scorers</a> · <a href="reports/goals-record.html">Goals record</a> · <a href="reports/games.html">Games</a> · <a href="reports/record.html">Games record</a><br>Model chances, not guarantees. 21+. Problem gambling help: 1-800-GAMBLER.';
   if(keep)window.scrollTo(0,y);
 }
 document.addEventListener("click",function(e){
