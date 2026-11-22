@@ -1,0 +1,87 @@
+<!doctype html><html><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'><title>NHL games record</title><style>body{margin:0;padding:14px;font:13px/1.45 ui-monospace,Menlo,Consolas,monospace;background:#f6f7f9;color:#16181d}@media (prefers-color-scheme:dark){body{background:#0f1115;color:#e8eaee}}pre{white-space:pre-wrap;word-break:break-word;margin:0}a{color:#1f6feb}</style></head><body><p><a href='games.html'>&larr; Today's report</a></p><pre>NHL game predictor record (updated 2026-11-22 07:16 AM)
+
+TARGETS (the bets the report leads with; 1 unit each)
+  All                         46-22  hit  68% (needed 62%)   +6.02u  ROI +8.9%
+  3rd-period team to score     6-1   hit  86% (needed 64%)   +2.37u  ROI +33.9%
+  Favorite to win             40-21  hit  66% (needed 62%)   +3.65u  ROI +6.0%
+  Last 7 nights               22-12  hit  65% (needed 62%)   +1.49u  ROI +4.4%
+  By night: 11-10 2-1  11-11 3-0  11-12 3-2  11-14 5-3  11-15 1-1  11-16 1-0  11-17 3-2  11-18 1-1  11-19 3-2  11-21 8-3
+
+MODEL vs FANDUEL (moneyline log loss on the same games; lower is better)
+  All                                  186 games  model 0.6713  FanDuel 0.6642  FanDuel ahead
+  Since 11-03 (Daily Faceoff goalies)  135 games  model 0.6732  FanDuel 0.6691  FanDuel ahead
+  Last 7 nights                         61 games  model 0.7260  FanDuel 0.7184  FanDuel ahead
+
+OUR LINES vs FANDUEL (model alone, no market blend)
+  Accuracy since 11-03 (log loss, lower is better):
+    Winners                     270 lines  ours 0.6732  FanDuel 0.6691  FanDuel better
+    Puck line                   270 lines  ours 0.6524  FanDuel 0.6539  OURS better
+    Totals                      270 lines  ours 0.7074  FanDuel 0.6953  FanDuel better
+    3rd-period team to score    258 lines  ours 0.6136  FanDuel 0.6254  OURS better
+  Betting the side our line likes 3+ points more than FanDuel (since 11-03):
+    3rd-period team to score    27-9    +7.39u  ROI  +20.5%
+    Other period line            3-7    -2.22u  ROI  -22.2%
+    Puck line                   42-28   -1.19u  ROI   -1.7%
+    Total, Over                 27-29   -4.50u  ROI   -8.0%
+    Total, Under                12-16   -4.31u  ROI  -15.4%
+    Winner, favorite            23-14   +1.46u  ROI   +3.9%
+    Winner, underdog             8-17   -5.35u  ROI  -21.4%
+  Large gaps (5+ points), all dates:
+    3rd-period team to score    18-8    +3.19u  ROI  +12.3%
+    Other period line            0-1    -1.00u  ROI -100.0%
+    Puck line                   40-27   -3.65u  ROI   -5.4%
+    Total, Over                 23-19   +2.28u  ROI   +5.4%
+    Total, Under                18-17   -1.27u  ROI   -3.6%
+    Winner, favorite            15-4    +5.89u  ROI  +31.0%
+    Winner, underdog            10-16   -0.94u  ROI   -3.6%
+
+Closing line value (price taken vs FanDuel&#x27;s last price before the game)
+  B      1 plays  avg -0.5 pts  beat the close 0/1
+  C      7 plays  avg +0.2 pts  beat the close 2/7
+  all   24 plays  avg +0.1 pts  beat the close 7/24
+  (beating the close consistently is the earliest sign the picks have real value)
+
+------------------------------------------------------------
+DETAILS
+Bets (1 unit each), by market and tier
+  moneyline B    1-0-0  +1.55u  ROI +155.0%
+  moneyline C    1-2-0  -0.10u  ROI -3.3%
+  moneyline Pass 215-215-0  -24.06u  ROI -5.6%
+  puckline  B    1-1-0  -0.37u  ROI -18.4%
+  puckline  C    3-3-0  -1.62u  ROI -27.0%
+  puckline  Pass 237-246-0  -43.48u  ROI -9.0%
+  team_total Pass 56-56-0  -22.96u  ROI -20.5%
+  team_total_p1 Pass 8-8-0  -1.77u  ROI -11.1%
+  team_total_p2 Pass 8-8-0  -0.88u  ROI -5.5%
+  team_total_p3 Pass 228-228-0  -28.60u  ROI -6.3%
+  total     B    0-3-0  -3.00u  ROI -100.0%
+  total     C    4-5-0  -1.60u  ROI -17.8%
+  total     Pass 251-248-0  -39.02u  ROI -7.8%
+  total_p1  Pass 4-4-0  -0.05u  ROI -0.6%
+  total_p2  Pass 4-4-0  +0.07u  ROI +0.9%
+  total_p3  Pass 4-4-0  +0.55u  ROI +6.9%
+
+Games: 219 graded. Winner picked 125/219 (57.1%), log loss 0.6712 (coin flip 0.6931), Brier 0.2391
+  Favorite&#x27;s predicted vs actual win rate:
+    50-60%: predicted 55.0%, won 53.5% (159 games)
+    60-70%: predicted 63.5%, won 62.2% (45 games)
+    70-80%: predicted 73.5%, won 83.3% (12 games)
+    80-90%: predicted 80.8%, won 66.7% (3 games)
+  Total goals: projected 6.32, actual 6.52 per game
+
+Team-to-score by period: 1314 graded, Brier 0.2197 (lower is better)
+  Matchup (goals for vs against) Brier 0.2324 vs model 0.2197 on the same 1314
+    40-50%: predicted 48.6%, scored 60.0% (10)
+    50-60%: predicted 56.9%, scored 60.4% (338)
+    60-70%: predicted 64.5%, scored 67.5% (845)
+    70-80%: predicted 72.4%, scored 80.5% (118)
+    80-90%: predicted 81.2%, scored 66.7% (3)
+
+NHL Edge vs play-by-play only (same games, lower is better)
+  188 games
+  Moneyline (log loss)           without 0.6760   with Edge 0.6764   Edge worse
+  Total goals (avg miss)         without 1.9212   with Edge 1.9246   Edge worse
+  Over/under 5.5 &amp; 6.5 (Brier)   without 0.2493   with Edge 0.2510   Edge worse
+  Puck line -1.5 (Brier)         without 0.1947   with Edge 0.1957   Edge worse
+  Team scores in period (Brier)  without 0.2197   with Edge 0.2198   Edge worse
+</pre></body></html>
