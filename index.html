@@ -164,6 +164,7 @@ footer{margin-top:30px;font-size:12px;color:var(--mute);line-height:1.6;text-ali
       <a href="#shots" data-tab="shots"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/></svg>Shots</a>
       <a href="#games" data-tab="games"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Games</a>
       <a href="#best" data-tab="best"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/></svg>Best bets</a>
+      <a href="reports/nfl.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><ellipse cx="12" cy="12" rx="9" ry="5.5" transform="rotate(-35 12 12)"/><path d="M9.5 14.5l5-5M10.5 11l2.5 2.5M12 9.5l2.5 2.5"/></svg>NFL</a>
     </nav>
   </header>
   <main id="app"><div class="loading">Loading tonight's picks…</div></main>
@@ -403,7 +404,7 @@ function render(keep){
   document.getElementById("app").innerHTML=rt.game?viewGame(rt.game):views[rt.tab]();
   var fresh=ago(D.generated_at)<6;
   document.getElementById("upd").innerHTML='<span class="dot'+(fresh?"":" old")+'"></span>'+esc(timeLabel(D.generated_at));
-  document.getElementById("foot").innerHTML='Updated '+esc(dayLabel(D.generated_at.slice(0,10))+", "+timeLabel(D.generated_at))+' · updates after every model run<br>Full reports: <a href="reports/goals.html">Goal scorers</a> · <a href="reports/goals-record.html">Goals record</a> · <a href="reports/sog.html">Shots</a> · <a href="reports/games.html">Games</a> · <a href="reports/record.html">Games record</a><br>Model chances, not guarantees. 21+. Problem gambling help: 1-800-GAMBLER.';
+  document.getElementById("foot").innerHTML='Updated '+esc(dayLabel(D.generated_at.slice(0,10))+", "+timeLabel(D.generated_at))+' · updates after every model run<br>Full reports: <a href="reports/goals.html">Goal scorers</a> · <a href="reports/goals-record.html">Goals record</a> · <a href="reports/sog.html">Shots</a> · <a href="reports/games.html">Games</a> · <a href="reports/record.html">Games record</a> · <a href="reports/nfl.html">NFL model</a><br>Model chances, not guarantees. 21+. Problem gambling help: 1-800-GAMBLER.';
   if(keep)window.scrollTo(0,y);
 }
 document.addEventListener("click",function(e){
